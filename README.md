@@ -6,22 +6,33 @@ RocketFramework for Vue Laravel Helpers.
 ```php
 composer install ianrothmann/inertia-laravel-app-service
 ```
-In config/app.php
+In config/app.php (if it does not auto-configure)
 
 Service provider 
 ```php
-IanRothmann\RocketLaravelAppFramework\ServiceProviders\RocketAppServiceProvider::class
+IanRothmann\InertiaApp\ServiceProviders\InertiaAppServiceProvider::class
 ```
 
 Facades
 ```php
-'Rocket' =>IanRothmann\RocketLaravelAppFramework\Facades\Rocket::class
+'Rocket' =>IanRothmann\InertiaApp\Facades\InertiaApp::class
 ```
 
 Publish the config
 
 ```php
-php artisan vendor:publish --provider="IanRothmann\RocketLaravelAppFramework\ServiceProviders\RocketAppServiceProvider"  --tag="config"
+php artisan vendor:publish --provider="IanRothmann\InertiaApp\ServiceProviders\InertiaAppServiceProvider"  --tag="config"
+```
+
+## Configuration
+
+In the `boot` method of `AppServiceProvider.php`:
+
+```php
+InertiaApp::register()->resolveMenuItemRightsWith(function($code){
+            //The code that is required to resolve a menu right
+            return Auth::check() && Auth::user()->hasRight($code);
+        });
 ```
 
 ## Menus
@@ -31,57 +42,37 @@ Menus can be specified in middleware, but can also be modified in any controller
 You can give the menu a name, for instance "main", and then chain the items. The icon is optional. If you need a custom item, you can use `->custom`
 
 ```php
+ $group=InertiaApp::menuGroup('Sub-menu','mdi-account')
+            ->route('Page 1','pages.page1',[],'mdi-phone')
+            ->link('Google','http://google.com','mdi-link');
+
+        InertiaApp::menu('main')
+            ->route('Item 1','pages.spec',[1,2],'mdi-home')
+            ->route('Item 2','pages.spec',[2,1],'mdi-phone','test')
+            ->route('Item 3','pages.spec',[9,8],'mdi-phone')
+            ->group($group)
+            ->link('Google','http://google.com');
 
 ```
 
-Groups are also possible. Specify `->group`. This returns the item. Then specify `->subMenu()`, and now you can chain the items to the submenu. You need to start with `Rocket::menu('main')` again to add main menu items.
-
-```php
- Rocket::menu('main')
-            ->group('Rocket CRUD')
-            ->subMenu()
-            ->route('CRUD Table','rocket.crud.table');
-            
- Rocket::menu('main')->route('Home','home',[]);
-```
 ### Prepending
-Sometimes one would like to prepend items (especially when modifying middleware defined menus from the controller. All item functions can start with `push` to prepend.
+Sometimes one would like to prepend items (especially when modifying middleware defined menus from the controller. All item functions can start with `prepend` to prepend.
 
 ```php
-   Rocket::menu('main')->pushRoute('Home','home',[]); //pushLink, pushGroup, pushCustom etc.
+$group=InertiaApp::menuGroup(Auth::user()->name,'mdi-account')
+            ->route('Update profile','pages.user.profile',[],'mdi-account-card-details-outline')
+            ->route('Change password','pages.user.changepassword',[],'mdi-key-variant');
+
+        InertiaApp::menu('main')
+            ->prependGroup($group); //or prependRoute, prependCustom etc.
 ```
+### Helpers
+For brevity, we registered `iview()` which is the same as `Inertia::render()`.
+You can also use `page_title('Page title here',$addTobreadcrumbs=true)` to set the page title and breadcrumbs.
 
 ### Front-end
 
-This package integrates with VueBridge and makes the menu available in `$store.state.server.rocketMenus`, for use with `rocket-framework-menu` in `RocketVueAppFramework`:
-
-```php
-<rocket-framework-menu :menu="$store.state.server.rocketMenus&&$store.state.server.rocketMenus.main"></rocket-framework-menu>
-```
+Docs coming soon
 
 ### Breadcrumbs
-
-Use `Rocket::breadcrumbs()`, to access the BreadcrumbsService:
-
-You may either use:
-```php
-@include('rocket::breadcrumbsmenu')
-```
-to show a menu icon with the items in a menu
-
-or
-```php
-@include('rocket::breadcrumbs')
-```
-To display a classic breadcrumbs bar. Everything is only implemented in Vuetify. You cannot use both, be sure to only use one of them on a page.
-
-in `config/rocketframework.php`, you may set
-```php
-'breadcrumbs' => [
-        'number'=>4, //Number of breadcrumbs to save
-        'default'=>'show' //Default behaviour to show or hide breadcrumbs
-    ]
-```
-
-On any page you may call: `Rocket::breadcrumbs()->show()` or `Rocket::breadcrumbs()->hide()` to bread away from the default behaviour. You can also set a namespace for the breadcrumbs to limit them on certain parts/sessions on the system. For instance: `Rocket::breadcrumbs()->setBreadcrumbsNamespace($clientid)`
-
+Docs coming soon
