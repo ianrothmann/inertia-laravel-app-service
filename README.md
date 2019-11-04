@@ -1,5 +1,5 @@
-# RocketLaravelAppFramework
-RocketFramework for Vue Laravel Helpers.
+# Rocket Inertia and Laravel App Framework Service 
+RocketFramework for Inertia and Laravel.
 
 ## Installation 
 
