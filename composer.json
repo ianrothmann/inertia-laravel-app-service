@@ -1,0 +1,22 @@
+{
+    "name": "ianrothmann/inertia-laravel-app-service",
+    "description": "RocketFramework Inertia Laravel Helpers",
+	"type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ian Rothmann",
+            "email": "ian@xtrapolate.io"
+        }
+    ],
+    "require": {
+		"php": ">=7.3.0",
+        "laravel/framework": ">=6.0.0",
+        "tightenco/ziggy": "^0.8.1"
+	},
+	"autoload": {
+        "psr-4": {
+            "IanRothmann\\InertiaApp\\": "src/"
+        }
+    }
+}
