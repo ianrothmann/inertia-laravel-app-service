@@ -39,11 +39,11 @@ class InertiaPageGenerator extends Command
         return <<<EOT
 <template>
     <v-container fill-height>
-        <v-col align-self="start">
-            <v-row justify="center">
+        <v-row justify="start" class="fill-height">
+            <v-col align-self="start">
                 
-            </v-row>
-        </v-col>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
