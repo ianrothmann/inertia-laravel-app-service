@@ -113,7 +113,7 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
      * @return $this
      */
     public function prependRoute($label, $routeName, $params=[], $icon=null, $rightOrClosure=null){
-        $this->route($label,$routeName,$params,$icon,$rightOrClosure);
+        $this->route($label,$routeName,$params,$icon,$rightOrClosure,true);
         return $this;
     }
 
@@ -126,7 +126,7 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
      * @return $this
      */
     public function prependLink($label, $url, $icon=null, $rightOrClosure=null){
-        $this->link($label,$url,$icon,$rightOrClosure);
+        $this->link($label,$url,$icon,$rightOrClosure, true);
         return $this;
     }
 
@@ -165,7 +165,7 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
                 }
             }
         }
-
+        
         if($shouldAdd){
             $prepend ? $this->items->prepend($item) :
                 $this->items->add($item);
