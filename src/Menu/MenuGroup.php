@@ -165,7 +165,7 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
                 }
             }
         }
-        
+
         if($shouldAdd){
             $prepend ? $this->items->prepend($item) :
                 $this->items->add($item);
