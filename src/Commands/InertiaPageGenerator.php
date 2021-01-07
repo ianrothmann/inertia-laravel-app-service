@@ -36,30 +36,32 @@ class InertiaPageGenerator extends Command
 
     public function generatePage($name)
     {
+        $appNavPath = '$comp/layout/AppNav';
         return <<<EOT
 <template>
     <v-container fill-height>
-        <v-col align-self="start">
-            <v-row justify="center">
+        <v-row justify="start" class="fill-height">
+            <v-col align-self="start">
                 
-            </v-row>
-        </v-col>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
 <script>
-    import AppNav from '../../layout/AppNav';
+     import AppNav from '{$appNavPath}';
     
     export default{
         name: '{$name}',
         layout: AppNav,
-        props: {},
-        mixins: [],
         components: {},
+        mixins: [],
+        props: {},
         data: () => ({}),
         computed: {},
-        mounted() {},
-        methods: {}
+        watchers: {},
+        methods: {},
+        mounted() {}
     }
 </script>
 
@@ -72,7 +74,7 @@ EOT;
 
     protected function makeDirectory($path)
     {
-        if (! $this->files->isDirectory(dirname($path))) {
+        if (!$this->files->isDirectory(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0777, true, true);
         }
         return $path;

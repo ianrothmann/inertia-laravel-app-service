@@ -31,8 +31,14 @@ class InertiaAppService
     private function addToBreadcrumbs($title,$url){
         $crumbs=collect(session($this->breadcrumbsSessionKey,[]));
 
-        if($crumbs->count()==0 || ($crumbs->count()>0 && $crumbs->last()['url']!=$url)){
+        if(!$crumbs->contains('url', $url)){
             $crumbs[]=compact('title','url');
+        }
+        else {
+            $index = $crumbs->search(function($crumb) use($url) {
+                return $crumb['url'] === $url;
+            });
+            $crumbs = $crumbs->slice(0, $index + 1);
         }
 
         if($crumbs->count()>$this->breadcrumbCount){

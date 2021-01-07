@@ -41,7 +41,7 @@ abstract class AbstractMenuItem implements \JsonSerializable, Arrayable
         $this->itemAccessRight=$rightOrClosure;
         return $this;
     }
-
+    
     /**
      * @param String $value
      * @return $this
