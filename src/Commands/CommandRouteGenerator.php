@@ -12,92 +12,58 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Routing\Router;
 use Tightenco\Ziggy\RoutePayload;
+use Tightenco\Ziggy\Ziggy;
 
 class CommandRouteGenerator extends Command
 {
-    protected $signature = 'framework:routes {path=./resources/js/ziggy.js} {--url=/}';
+    protected $signature = 'framework:routes {path=./resources/js/ziggy.js} {--url=/} {--group=}';
 
     protected $description = 'Generate js file for including in build process';
 
-    protected $baseUrl;
-    protected $baseProtocol;
-    protected $baseDomain;
-    protected $basePort;
-    protected $router;
+    protected $files;
 
-    public function __construct(Router $router, Filesystem $files)
+    public function __construct(Filesystem $files)
     {
         parent::__construct();
 
-        $this->router = $router;
         $this->files = $files;
     }
 
     public function handle()
     {
         $path = $this->argument('path');
-
-        $generatedRoutes = $this->generate();
+        $generatedRoutes = $this->generate($this->option('group'));
 
         $this->makeDirectory($path);
-
-        $this->files->put($path, $generatedRoutes);
+        $this->files->put(base_path($path), $generatedRoutes);
 
         $this->info('File generated!');
     }
 
-    public function generate($group = false)
+    private function generate($group = false)
     {
-        $this->prepareDomain();
+        $payload = (new Ziggy($group, $this->option('url') ? url($this->option('url')) : null))->toJson();
 
-        $json = $this->getRoutePayload($group)->toJson();
+        return <<<JAVASCRIPT
+const Ziggy = {$payload};
 
-        $defaultParameters = method_exists(app('url'), 'getDefaultParameters') ? json_encode(app('url')->getDefaultParameters()) : '[]';
-
-        return <<<EOT
-    var Ziggy = {
-        namedRoutes: $json,
-        baseUrl: location.protocol+'//'+location.hostname+':'+location.port+'/',
-        baseProtocol: location.protocol,
-        baseDomain: location.hostname,
-        basePort: location.port,
-        defaultParameters: $defaultParameters
-    };
-
-    if (typeof window.Ziggy !== 'undefined') {
-        for (var name in window.Ziggy.namedRoutes) {
-            Ziggy.namedRoutes[name] = window.Ziggy.namedRoutes[name];
-        }
+if (typeof window !== 'undefined' && typeof window.Ziggy !== 'undefined') {
+    for (let name in window.Ziggy.routes) {
+        Ziggy.routes[name] = window.Ziggy.routes[name];
     }
+}
 
-    export {
-        Ziggy
-    }
+export { Ziggy };
 
-EOT;
-    }
-
-    private function prepareDomain()
-    {
-        $url = url($this->option('url'));
-        $parsedUrl = parse_url($url);
-
-        $this->baseUrl = $url . '/';
-        $this->baseProtocol = array_key_exists('scheme', $parsedUrl) ? $parsedUrl['scheme'] : 'http';
-        $this->baseDomain = array_key_exists('host', $parsedUrl) ? $parsedUrl['host'] : '';
-        $this->basePort = array_key_exists('port', $parsedUrl) ? $parsedUrl['port'] : 'false';
-    }
-
-    public function getRoutePayload($group = false)
-    {
-        return RoutePayload::compile($this->router, $group);
+JAVASCRIPT;
     }
 
     protected function makeDirectory($path)
     {
-        if (! $this->files->isDirectory(dirname($path))) {
-            $this->files->makeDirectory(dirname($path), 0777, true, true);
+        if (! $this->files->isDirectory(dirname(base_path($path)))) {
+            $this->files->makeDirectory(dirname(base_path($path)), 0777, true, true);
         }
+
         return $path;
     }
 }
