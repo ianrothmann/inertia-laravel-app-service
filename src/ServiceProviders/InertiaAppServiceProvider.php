@@ -4,6 +4,8 @@ namespace IanRothmann\InertiaApp\ServiceProviders;
 
 use IanRothmann\InertiaApp\Commands\CommandRouteGenerator;
 use IanRothmann\InertiaApp\Commands\InertiaPageGenerator;
+use IanRothmann\InertiaApp\Middleware\SetFromBackUrlInSession;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
 
 class InertiaAppServiceProvider extends ServiceProvider
@@ -19,6 +21,9 @@ class InertiaAppServiceProvider extends ServiceProvider
             CommandRouteGenerator::class,
             InertiaPageGenerator::class
         ]);
+
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->pushMiddleware(SetFromBackUrlInSession::class);
     }
 
     public function register(){

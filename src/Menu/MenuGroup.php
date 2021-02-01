@@ -193,11 +193,18 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
         return $data;
     }
 
-    public function back(string $defaultUrl = null, $rightOrClosure = null, string $label = 'Back', string $icon = 'mdi-arrow-left-bold')
+    public function back(string $defaultRouteName, array $defaultParams = [], $rightOrClosure = null, string $label = 'Back', string $icon = 'mdi-arrow-left-bold')
     {
+        $className = $this->getCallingClass();
+        $key = 'back_urls.' . $className;
+        $defaultUrl = route($defaultRouteName, $defaultParams);
+        if ($this->currentMenuContainsUrl($defaultUrl)) {
+            throw new \Exception('Default back url/route for ' . $className . ' cannot be used as a route/link in ' . $className);
+        }
+
         $item = (new MenuItem())
             ->label($label)
-            ->link($this->getBackUrl($defaultUrl))
+            ->link($this->getBackUrl($key, $defaultUrl))
             ->icon($icon)
             ->right($rightOrClosure);
 
@@ -221,29 +228,59 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
         throw new \Exception('Calling class could not be determined');
     }
 
-    private function getBackUrl()
+    private function getBackUrl(string $key, string $defaultUrl)
     {
-        $url = \URL::previous();
-        $className = $this->getCallingClass();
-        $key = 'back_urls.' . $className;
-        $this->setBackUrl($key, $url);
-        if($this->currentMenuContainsUrl($url)) {//Protection against navigation to any url in current menu. Fallback to url in session.
-            $url = session($key);
+        //Detect if previous url was a back url from another menu, if true fallback to url in session or default url, and clear back url indicator from session.
+        if (intval(session()->get('_from_back_url')) === 1) {
+            $url = session($key) ?? $defaultUrl;
+            session()->remove('_from_back_url');
+            session()->save();
+        } else {
+            $url = \URL::previous();
+            if ($url && $this->currentMenuContainsUrl($url)) {//Protection against navigation to any url in current menu. Fallback to url in session.
+                $url = session($key) ?? $defaultUrl;
+            } else {
+                if ($url) {
+                    $this->setBackUrl($key, $url);
+                } else {
+                    $url = $defaultUrl;
+                }
+            }
         }
+
+        //Append param to detect when url was clicked, via SetFromBackUrlInSession middleware.
+        $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . '_from_back_url=1';
 
         return $url;
     }
 
     private function setBackUrl(string $key, string $url)
     {
-        if(!session()->has($key)) {
+        if (!session()->has($key)) {
             session()->put($key, $url);
         }
     }
 
     private function currentMenuContainsUrl(string $url)
     {
-        return $this->items->contains(function ($item) use ($url) {
+        //Merge groups with items and iterate through collection to find a match
+        $items = $this->items->reduce(function ($carry, $item) {
+            /**
+             * @var Collection $carry
+             */
+            $class = get_class($item);
+            if ($class === MenuItem::class) {
+                $carry->push($item);
+            } elseif ($class === MenuGroup::class) {
+                $carry = $carry->concat($item->items);
+            } else {
+                throw new \LogicException();
+            }
+
+            return $carry;
+        }, collect());
+
+        return $items->contains(function ($item) use ($url) {
             $itemData = $item->toArray();
             if ($itemData['url']) {
                 return $itemData['url'] === $url;
