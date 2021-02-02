@@ -230,10 +230,11 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
 
     private function getBackUrl(string $key, string $defaultUrl)
     {
+        $fromBackUrlKey = config('inertia-app.back_request_key');
         //Detect if previous url was a back url from another menu, if true fallback to url in session or default url, and clear back url indicator from session.
-        if (intval(session()->get('_from_back_url')) === 1) {
+        if (intval(session()->get($fromBackUrlKey)) === 1) {
             $url = session($key) ?? $defaultUrl;
-            session()->remove('_from_back_url');
+            session()->remove($fromBackUrlKey);
             session()->save();
         } else {
             $url = \URL::previous();
@@ -249,7 +250,7 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
         }
 
         //Append param to detect when url was clicked, via SetFromBackUrlInSession middleware.
-        $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . '_from_back_url=1';
+        $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . $fromBackUrlKey . '=1';
 
         return $url;
     }

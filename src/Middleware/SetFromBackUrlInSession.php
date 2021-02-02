@@ -15,11 +15,12 @@ class SetFromBackUrlInSession
      */
     public function handle($request, Closure $next)
     {
-        if ($request->has('_from_back_url')) {
-            if (intval($request->get('_from_back_url', 0)) === 1) {
-                session()->put('_from_back_url', 1);
+        $fromBackUrlKey = config('inertia-app.back_request_key');
+        if ($request->has($fromBackUrlKey)) {
+            if (intval($request->get($fromBackUrlKey, 0)) === 1) {
+                session()->put($fromBackUrlKey, 1);
             }
-            return redirect()->to(url()->current() . '?' . http_build_query($request->except('_from_back_url')));
+            return redirect()->to(url()->current() . '?' . http_build_query($request->except($fromBackUrlKey)));
         }
         return $next($request);
     }
