@@ -6,6 +6,7 @@ use IanRothmann\InertiaApp\Commands\CommandRouteGenerator;
 use IanRothmann\InertiaApp\Commands\InertiaPageGenerator;
 use IanRothmann\InertiaApp\Middleware\SetFromBackUrlInSession;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class InertiaAppServiceProvider extends ServiceProvider
@@ -22,8 +23,7 @@ class InertiaAppServiceProvider extends ServiceProvider
             InertiaPageGenerator::class
         ]);
 
-        $kernel = $this->app->make(Kernel::class);
-        $kernel->pushMiddleware(SetFromBackUrlInSession::class);
+        $this->registerMiddleware();
     }
 
     public function register(){
@@ -43,6 +43,12 @@ class InertiaAppServiceProvider extends ServiceProvider
         }
     }
 
-
+    /**
+     * Register all middleware
+     */
+    public function registerMiddleware() {
+        $router = $this->app->make(Router::class);
+        $router->pushMiddlewareToGroup('web', SetFromBackUrlInSession::class);
+    }
 
 }
