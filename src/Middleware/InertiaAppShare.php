@@ -3,8 +3,6 @@
 namespace IanRothmann\InertiaApp\Middleware;
 
 use Closure;
-use IanRothmann\InertiaApp\Facades\InertiaApp;
-use Inertia\Inertia;
 
 class InertiaAppShare
 {
