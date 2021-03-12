@@ -163,4 +163,9 @@ class InertiaAppService
             }
         });
     }
+
+    public function clearNavigationHistory() {
+        session()->forget(config('inertia-app.nav_history.session_key'));
+        session()->forget('_previous');
+    }
 }
