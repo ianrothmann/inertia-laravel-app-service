@@ -3,6 +3,7 @@
 namespace IanRothmann\InertiaApp\Middleware;
 
 use Closure;
+use IanRothmann\InertiaApp\Facades\InertiaApp;
 
 class SetFromBackUrlInSession
 {
@@ -15,14 +16,14 @@ class SetFromBackUrlInSession
      */
     public function handle($request, Closure $next)
     {
-        $fromBackUrlKey =  config('inertia-app.nav_history.request_key');
-        $sessionKey =  config('inertia-app.nav_history.session_key');
+        InertiaApp::removeUrlFromNavigationHistory($request->fullUrl());
+
+        $fromBackUrlKey = config('inertia-app.nav_history.request_key');
         if ($request->has($fromBackUrlKey)) {
             if (intval($request->get($fromBackUrlKey, 0)) === 1) {
                 session()->put($fromBackUrlKey, 1);
-                session()->remove($sessionKey . '.' . $request->get('_menu'));
             }
-            $queryString = http_build_query($request->except($fromBackUrlKey, '_menu'));
+            $queryString = http_build_query($request->except($fromBackUrlKey));
             return redirect()->to(url()->current() . ($queryString ? '?' . $queryString : ''));
         }
         $response = $next($request);

@@ -19,37 +19,38 @@ class InertiaAppService
     private $menuContainer;
     private $menuItemGuardResolver;
     private $currentPageTitle;
-    private $breadcrumbsSessionKey='_breadcrumbs';
-    private $breadcrumbCount=5;
-    private $authData=[];
+    private $breadcrumbsSessionKey = '_breadcrumbs';
+    private $breadcrumbCount = 5;
+    private $authData = [];
 
     public function __construct()
     {
-        $this->menuContainer=new Collection();
+        $this->menuContainer = new Collection();
     }
 
-    private function addToBreadcrumbs($title,$url){
-        $crumbs=collect(session($this->breadcrumbsSessionKey,[]));
+    private function addToBreadcrumbs($title, $url)
+    {
+        $crumbs = collect(session($this->breadcrumbsSessionKey, []));
 
-        if(!$crumbs->contains('url', $url)){
-            $crumbs[]=compact('title','url');
-        }
-        else {
-            $index = $crumbs->search(function($crumb) use($url) {
+        if (!$crumbs->contains('url', $url)) {
+            $crumbs[] = compact('title', 'url');
+        } else {
+            $index = $crumbs->search(function ($crumb) use ($url) {
                 return $crumb['url'] === $url;
             });
             $crumbs = $crumbs->slice(0, $index + 1);
         }
 
-        if($crumbs->count()>$this->breadcrumbCount){
+        if ($crumbs->count() > $this->breadcrumbCount) {
             $crumbs->shift();
         }
-        session([$this->breadcrumbsSessionKey=>$crumbs->toArray()]);
+        session([$this->breadcrumbsSessionKey => $crumbs->toArray()]);
     }
 
-    public function auth($authData){
-        $this->authData=$authData;
-        $this->authData['timeout']=config('session.lifetime')*60;
+    public function auth($authData)
+    {
+        $this->authData = $authData;
+        $this->authData['timeout'] = config('session.lifetime') * 60;
         return $this;
     }
 
@@ -59,10 +60,11 @@ class InertiaAppService
      * @param bool $addToBreadcrumbs
      * @return $this
      */
-    public function page($pageTitle, $addToBreadcrumbs = true){
-        $this->currentPageTitle=$pageTitle;
-        if($addToBreadcrumbs){
-            $this->addToBreadcrumbs($pageTitle,\URL::current());
+    public function page($pageTitle, $addToBreadcrumbs = true)
+    {
+        $this->currentPageTitle = $pageTitle;
+        if ($addToBreadcrumbs) {
+            $this->addToBreadcrumbs($pageTitle, \URL::current());
         }
 
         return $this;
@@ -72,9 +74,10 @@ class InertiaAppService
      * @param $key
      * @return \IanRothmann\InertiaApp\Menu\MenuGroup
      */
-    public function menu($key){
-        if(!$this->menuContainer->has($key)){
-            $this->menuContainer[$key]=new MenuGroup($this->menuItemGuardResolver);
+    public function menu($key)
+    {
+        if (!$this->menuContainer->has($key)) {
+            $this->menuContainer[$key] = new MenuGroup($this->menuItemGuardResolver);
         }
         return $this->menuContainer[$key];
     }
@@ -85,8 +88,9 @@ class InertiaAppService
      * @param \Closure|string $itemAccessRight
      * @return \IanRothmann\InertiaApp\Menu\MenuGroup
      */
-    public function menuGroup($label, $icon=null, $itemAccessRight=null){
-        return MenuGroup::create($label,$icon)
+    public function menuGroup($label, $icon = null, $itemAccessRight = null)
+    {
+        return MenuGroup::create($label, $icon)
             ->right($itemAccessRight);
     }
 
@@ -94,15 +98,17 @@ class InertiaAppService
      * @param $closure
      * @return $this
      */
-    public function resolveMenuItemRightsWith(\Closure $closure){
-        $this->menuItemGuardResolver=$closure;
+    public function resolveMenuItemRightsWith(\Closure $closure)
+    {
+        $this->menuItemGuardResolver = $closure;
         return $this;
     }
 
     /**
      * @return $this
      */
-    public function register(){
+    public function register()
+    {
         $this->shareMenuData();
         $this->sharePageTitleData();
         $this->shareBreadcrumbData();
@@ -112,51 +118,57 @@ class InertiaAppService
         return $this;
     }
 
-    public function shareMenuData(){
-        Inertia::share('$menus',function(){
+    public function shareMenuData()
+    {
+        Inertia::share('$menus', function () {
             return $this->menuContainer->toArray();
         });
     }
 
-    public function shareAuth(){
-        Inertia::share('$auth',function(){
+    public function shareAuth()
+    {
+        Inertia::share('$auth', function () {
             return $this->authData;
         });
     }
 
-    public function sharePageTitleData(){
-        Inertia::share('$title',function(){
+    public function sharePageTitleData()
+    {
+        Inertia::share('$title', function () {
             return $this->currentPageTitle;
         });
     }
 
-    public function shareBreadcrumbData(){
-        Inertia::share('$breadcrumbs',function(){
-            return session($this->breadcrumbsSessionKey,[]);
+    public function shareBreadcrumbData()
+    {
+        Inertia::share('$breadcrumbs', function () {
+            return session($this->breadcrumbsSessionKey, []);
         });
     }
 
-    public function shareErrorData(){
+    public function shareErrorData()
+    {
         Inertia::share([
             '$errors' => function () {
                 return Session::get('errors')
                     ? Session::get('errors')->getBag('default')->getMessages()
-                    : (object) [];
+                    : (object)[];
             },
         ]);
     }
 
-    public function shareSessionFlash(){
+    public function shareSessionFlash()
+    {
         Inertia::share('$flash', function () {
-            if(Session::get('message')){
+            if (Session::get('message')) {
                 return [
                     'message' => Session::get('message'),
                 ];
-            }elseif(Session::get('error')){
+            } elseif (Session::get('error')) {
                 return [
                     'error' => Session::get('error'),
                 ];
-            }elseif(Session::get('success')){
+            } elseif (Session::get('success')) {
                 return [
                     'success' => Session::get('success'),
                 ];
@@ -164,8 +176,20 @@ class InertiaAppService
         });
     }
 
-    public function clearNavigationHistory() {
+    public function clearNavigationHistory()
+    {
         session()->forget(config('inertia-app.nav_history.session_key'));
         session()->forget('_previous');
+    }
+
+    public function removeUrlFromNavigationHistory(string $url)
+    {
+        $url = urldecode($url);
+        $sessionKey = config('inertia-app.nav_history.session_key');
+        $stack = array_map('urldecode', session($sessionKey, []));
+        $menu = array_search($url, $stack);
+        if ($menu) {
+            session()->remove($sessionKey . '.' . $menu);
+        }
     }
 }

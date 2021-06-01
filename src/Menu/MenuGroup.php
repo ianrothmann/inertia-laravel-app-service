@@ -195,24 +195,67 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
 
     public function back(string $defaultRouteName = null, array $defaultParams = [], $rightOrClosure = null, string $label = 'Back', string $icon = 'mdi-arrow-left-bold')
     {
-        $className = $this->getCallingClass();
-        $defaultUrl = null;
-        if ($defaultRouteName) {
-            $defaultUrl = route($defaultRouteName, $defaultParams);
+        $key = config('inertia-app.nav_history.session_key') . '.' . $this->getCallingClass();
+        $fromBackUrlKey = config('inertia-app.nav_history.request_key');
+        $url = $this->getBackUrl($key);
+        $right = null;
+        //If url not in session, try previous or use default
+        if (!$url) {
+//        Detect if previous url was a back url from another menu, if true fallback default url
+//        This prevents navigation deeper into the stack via the back url
+            $url = intval(session()->get($fromBackUrlKey)) === 1 ? null : url()->previous();
+            if (!$url || !$this->isValidBackUrl($url)) {
+                if ($defaultRouteName) {
+                    $url = route($defaultRouteName, $defaultParams);
+                    $right = $rightOrClosure;
+                }
+            } else {
+                $this->setBackUrl($key, $url);
+            }
         }
-        if ($this->currentMenuContainsUrl($defaultUrl)) {//Validate default url
-            throw new \Exception('Default back url/route for ' . $className . ' cannot be used as a route/link in ' . $className);
+        if ($url) {
+            //Append param to detect when url was clicked, via SetFromBackUrlInSession middleware.
+            $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . $fromBackUrlKey . '=1';
+
+            $item = (new MenuItem())
+                ->label($label)
+                ->link($url)
+                ->icon($icon);
+            if ($right) {
+                $item->right($right);
+            }
+            $this->addItem($item);
         }
-
-        $item = (new MenuItem())
-            ->label($label)
-            ->link($this->getBackUrl($className, $defaultUrl))
-            ->icon($icon)
-            ->right($rightOrClosure);
-
-        $this->addItem($item);
-
         return $this;
+    }
+
+    private function getBackUrl(string $key)
+    {
+        $url = session()->get($key, null);
+        return $url;
+    }
+
+    private function setBackUrl(string $key, string $url)
+    {
+        session()->put($key, $url);
+    }
+
+    private function isValidBackUrl(string $url)
+    {
+        $parsed = parse_url($url);
+        $path = ltrim($parsed['path'] ?? '', '/');
+        $blacklist = config('inertia-app.nav_history.blacklist', []);
+        return
+            //Validate host
+            isset($parsed['host']) && $parsed['host'] === request()->getHttpHost() &&
+            //Avoid using system base url as url
+            isset($parsed['path']) && $parsed['path'] !== '/' &&
+            //Url does not start with blacklisted paths
+            !array_reduce($blacklist, function ($carry, $blacklistPath) use ($path) {
+                return $carry or str_starts_with($path, ltrim($blacklistPath, '/'));
+            }, false) &&
+            //URL is not used as route inside menu
+            !$this->currentMenuContainsUrl($url);
     }
 
     private function getCallingClass()
@@ -228,42 +271,6 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
         }
 
         throw new \Exception('Calling class could not be determined');
-    }
-
-    private function getBackUrl(string $className, string $defaultUrl)
-    {
-        $key = config('inertia-app.nav_history.session_key') . '.' . $className;
-        $fromBackUrlKey = config('inertia-app.nav_history.request_key', 0);
-//        Detect if previous url was a back url from another menu, if true fallback to url in session or default url
-//        This prevents navigation deeper into the stack via the back url
-        if (intval(session()->get($fromBackUrlKey)) === 1) {
-            $url = session($key) ?? $defaultUrl;
-        } elseif (session()->has($key)) {
-            $url = session($key);//Use session url if exists, otherwise get previous. Once url in session is clicked, middleware will clear session and allow a new url to be placed into the session upon first render
-        } else {
-            $url = \URL::previous();
-
-            if ($url && $this->currentMenuContainsUrl($url)) {//Protection against navigation to any url in current menu. Fallback to url in session or default url.
-                $url = session($key) ?? $defaultUrl;
-            } else {
-                if ($url) {
-                    $this->setBackUrl($key, $url);
-                } else {
-                    $url = $defaultUrl;
-                }
-            }
-        }
-
-        //Append param to detect when url was clicked, via SetFromBackUrlInSession middleware.
-        $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . $fromBackUrlKey . '=1&_menu=' . $className;
-        return $url;
-    }
-
-    private function setBackUrl(string $key, string $url)
-    {
-        if (!session()->has($key)) {
-            session()->put($key, $url);
-        }
     }
 
     private function currentMenuContainsUrl(string $url)
