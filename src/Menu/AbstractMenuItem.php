@@ -13,7 +13,7 @@ use Illuminate\Contracts\Support\Arrayable;
 
 abstract class AbstractMenuItem implements \JsonSerializable, Arrayable
 {
-    protected $itemLabel, $itemHint, $itemIcon, $itemId, $itemTarget, $itemAccessRight;
+    protected $itemLabel, $itemHint, $itemIcon, $itemId, $itemTarget, $itemAccessRight, $itemOptions;
 
     /**
      * @param String $value
@@ -60,6 +60,15 @@ abstract class AbstractMenuItem implements \JsonSerializable, Arrayable
         return $this;
     }
 
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function options($options){
+        $this->itemOptions=$options;
+        return $this;
+    }
+
     public function jsonSerialize()
     {
         return $this->toArray();
@@ -71,6 +80,7 @@ abstract class AbstractMenuItem implements \JsonSerializable, Arrayable
         $data['label']=$this->itemLabel;
         $data['icon']=$this->itemIcon;
         $data['hint']=$this->itemHint;
+        $data['options']=$this->itemOptions;
 
         return $data;
     }
