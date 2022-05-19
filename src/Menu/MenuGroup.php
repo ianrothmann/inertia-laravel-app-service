@@ -42,17 +42,18 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
      * @param null $icon
      * @param null $rightOrClosure
      * @param bool $prepend
+     * @param array $options
      * @return $this
      * @throws \Exception
      */
-    public function route($label, $routeName, $params = [], $icon = null, $rightOrClosure = null, $prepend = false)
+    public function route($label, $routeName, $params = [], $icon = null, $rightOrClosure = null, $prepend = false, $options = [])
     {
         $item = (new MenuItem())
             ->label($label)
             ->route($routeName, $params)
             ->icon($icon)
-            ->right($rightOrClosure);
-
+            ->right($rightOrClosure)
+            ->options($options);
 
         $this->addItem($item, $prepend);
 
