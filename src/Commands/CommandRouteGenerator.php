@@ -47,10 +47,15 @@ class CommandRouteGenerator extends Command
         return <<<JAVASCRIPT
 const Ziggy = {$payload};
 
+let baseUrl = location.protocol + '//' + location.hostname;
+if(location.port) {
+    baseUrl += (':' + location.port)
+}
+Ziggy.url = baseUrl;
+Ziggy.port = location.port;
+
 if (typeof window !== 'undefined' && typeof window.Ziggy !== 'undefined') {
-    for (let name in window.Ziggy.routes) {
-        Ziggy.routes[name] = window.Ziggy.routes[name];
-    }
+    Object.assign(Ziggy.routes, window.Ziggy.routes);
 }
 
 export { Ziggy };
@@ -61,7 +66,7 @@ JAVASCRIPT;
     protected function makeDirectory($path)
     {
         if (! $this->files->isDirectory(dirname(base_path($path)))) {
-            $this->files->makeDirectory(dirname(base_path($path)), 0777, true, true);
+            $this->files->makeDirectory(dirname(base_path($path)), 0755, true, true);
         }
 
         return $path;
