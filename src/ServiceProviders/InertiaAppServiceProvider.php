@@ -4,8 +4,7 @@ namespace IanRothmann\InertiaApp\ServiceProviders;
 
 use IanRothmann\InertiaApp\Commands\CommandRouteGenerator;
 use IanRothmann\InertiaApp\Commands\InertiaPageGenerator;
-use IanRothmann\InertiaApp\Middleware\SetFromBackUrlInSession;
-use Illuminate\Contracts\Http\Kernel;
+use IanRothmann\InertiaApp\Commands\MenuGenerator;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,10 +19,9 @@ class InertiaAppServiceProvider extends ServiceProvider
 
         $this->commands([
             CommandRouteGenerator::class,
-            InertiaPageGenerator::class
+            InertiaPageGenerator::class,
+            MenuGenerator::class
         ]);
-
-        $this->registerMiddleware();
     }
 
     public function register(){
@@ -42,13 +40,4 @@ class InertiaAppServiceProvider extends ServiceProvider
             require_once __DIR__.DIRECTORY_SEPARATOR.'../helpers.php';
         }
     }
-
-    /**
-     * Register all middleware
-     */
-    public function registerMiddleware() {
-        $router = $this->app->make(Router::class);
-        $router->pushMiddlewareToGroup('web', SetFromBackUrlInSession::class);
-    }
-
 }

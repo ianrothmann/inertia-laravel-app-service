@@ -12,6 +12,8 @@ class InertiaPageGenerator extends Command
 
     protected $description = 'Generates an Inertia View';
 
+    protected $files;
+
     public function __construct(Filesystem $files)
     {
         parent::__construct();
