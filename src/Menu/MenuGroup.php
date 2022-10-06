@@ -160,6 +160,29 @@ class MenuGroup extends AbstractMenuItem implements \JsonSerializable, Arrayable
         return $this;
     }
 
+    /**
+     * @param $routeName
+     * @param array $params
+     * @param null $rightOrClosure
+     * @param string $label
+     * @param string $icon
+     * @return $this
+     * @throws \Exception
+     */
+    public function back($routeName, $params = [], $rightOrClosure = null, $label = 'Back', $icon = 'mdi-arrow-left-bold')
+    {
+        $url = route($routeName, $params);
+        $item = (new MenuItem())
+            ->label($label)
+            ->link($url)
+            ->icon($icon)
+            ->right($rightOrClosure);
+
+        $this->addItem($item, false);
+
+        return $this;
+    }
+
     private function addItem($item, $prepend = false)
     {
         $shouldAdd = true;

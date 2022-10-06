@@ -14,6 +14,8 @@ use InertiaApp;
 
 abstract class Menu
 {
+    protected $disableBackButton = false;
+
     public function __construct()
     {
         $this->updateTabSession();
@@ -38,7 +40,7 @@ abstract class Menu
 
         $this->menu($menu);
 
-        $this->addBackButton($menu);
+        !$this->disableBackButton && $this->addBackButton($menu);
 
         return $next($request);
     }
