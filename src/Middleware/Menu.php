@@ -76,7 +76,7 @@ abstract class Menu
             $url = URL::previous();
 
             //Check that prev menu is not descendant of current menu. In other words, the prev url cannot be used if we are navigating from a descendant to its ancestor.
-            if ($url && $prevMenu && $prevMenu !== $currentMenu && !$prevMenu::isDescendantOf($currentMenu)) {
+            if ($url && $prevMenu && $prevMenu !== $currentMenu && !$prevMenu::isDescendantOf($currentMenu) && !$this->visitingPrevUrl()) {
                 tab_manager()->set('navigation_history.' . $currentMenu, $url);
             } else {
                 $url = tab_manager('navigation_history.' . $currentMenu);
@@ -94,6 +94,11 @@ abstract class Menu
         }
 
         return $url;
+    }
+
+    private function visitingPrevUrl() {
+        $prevMenu = tab_manager('prev_menu_middleware');
+        return tab_manager('navigation_history.' . $prevMenu) === request()->fullUrl();
     }
 
     protected static function isDescendantOf(string $menu): bool
