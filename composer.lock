@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8dceaab4a3c2e7c965ab529b421e6a64",
+    "content-hash": "71a187753e5504e23d4e121b17b584c8",
     "packages": [
         {
             "name": "brick/math",
@@ -2067,16 +2067,16 @@
         },
         {
             "name": "stianscholtz/tab-manager-laravel",
-            "version": "v0.1.0-alpha",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stian-scholtz/tab-manager-laravel.git",
-                "reference": "7cd8fd6ff06975c73689ea1bde7da290a87c264a"
+                "reference": "127f2a678177cc7f111575293287a773c0ef8400"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stian-scholtz/tab-manager-laravel/zipball/7cd8fd6ff06975c73689ea1bde7da290a87c264a",
-                "reference": "7cd8fd6ff06975c73689ea1bde7da290a87c264a",
+                "url": "https://api.github.com/repos/stian-scholtz/tab-manager-laravel/zipball/127f2a678177cc7f111575293287a773c0ef8400",
+                "reference": "127f2a678177cc7f111575293287a773c0ef8400",
                 "shasum": ""
             },
             "require": {
@@ -2133,9 +2133,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stian-scholtz/tab-manager-laravel/issues",
-                "source": "https://github.com/stian-scholtz/tab-manager-laravel/tree/v0.1.0-alpha"
+                "source": "https://github.com/stian-scholtz/tab-manager-laravel/tree/v0.1.0"
             },
-            "time": "2022-10-05T08:13:58+00:00"
+            "time": "2022-11-14T10:11:47+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -4752,9 +4752,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "stianscholtz/tab-manager-laravel": 15
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

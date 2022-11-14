@@ -105,15 +105,25 @@ abstract class Menu
 
     protected static function isDescendantOf(string $menu): bool
     {
+        if(!class_exists($menu)){
+            return false;
+        }
+
+        /**
+         * @var Menu $menuInstance
+         */
         $currentMenu = get_called_class();
-        $allDescendants = $menu::getDescendants();
+        $menuInstance = new $menu;
+        $allDescendants = $menuInstance->getDescendants();
 
         $getDescendants = function($descendants) use(&$getDescendants, &$allDescendants) {
             foreach ($descendants as $descendant) {
-                $newDescendants = $descendant::getDescendants();
-
+                /**
+                 * @var Menu $descendantInstance
+                 */
+                $descendantInstance = new $descendant;
+                $newDescendants = $descendantInstance->getDescendants();
                 $allDescendants = array_merge($allDescendants, $newDescendants);
-
                 $getDescendants($newDescendants);
             }
         };
