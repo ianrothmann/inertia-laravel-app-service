@@ -13,7 +13,7 @@
 		"php": ">=7.4.0",
         "laravel/framework": ">=8.0.0",
         "tightenco/ziggy": "^1.4",
-        "eawardie/tab-manager-laravel": "v0.1.2"
+        "eawardie/tab-manager-laravel": "v0.2.2"
 	},
 	"autoload": {
         "psr-4": {
